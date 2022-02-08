@@ -12,4 +12,16 @@ login
 exit
 service password-encryption
 banner login Unathorization access deny
-
+interfaces e0/0
+no shutdown
+exit
+interface e0/0.3
+description interface for vlan3
+encapsulation dot1q 3
+ip address 192.168.3.1 255.255.255.0
+exit
+interface e0/0.4
+description interface for vlan4
+encapsulation dot1q 4
+ip address 192.168.4.1 255.255.255.0
+exit
