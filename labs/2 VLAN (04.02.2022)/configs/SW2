@@ -33,3 +33,8 @@ interface e0/1
 switchport mode access 
 switchport access vlan 4
 exit
+interface e0/0
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport allowed vlan 3,4,8
+
