@@ -235,3 +235,8 @@ ip default-gateway 192.168.3.1
 ```
 
 [Полная хронология комманд для R1](https://github.com/umostel/OTUShw/blob/main/labs/2%20VLAN%20(04.02.2022)/configs/R1)
+[Полная хронология комманд для SW1](https://github.com/umostel/OTUShw/blob/main/labs/2%20VLAN%20(04.02.2022)/configs/SW1)
+[Полная хронология комманд для SW2](https://github.com/umostel/OTUShw/blob/main/labs/2%20VLAN%20(04.02.2022)/configs/SW2)
+[Полная хронология комманд для VPC1](https://github.com/umostel/OTUShw/blob/main/labs/2%20VLAN%20(04.02.2022)/configs/VPC1)
+[Полная хронология комманд для VPC2](https://github.com/umostel/OTUShw/blob/main/labs/2%20VLAN%20(04.02.2022)/configs/VPC2)
+
