@@ -24,4 +24,7 @@ interface e0/0.4
 description interface for vlan4
 encapsulation dot1q 4
 ip address 192.168.4.1 255.255.255.0
+interface e0/0.8
+description Interface for native vlan8
+encapsulation dot1q 8 native
 exit
