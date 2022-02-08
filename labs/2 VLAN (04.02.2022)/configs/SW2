@@ -31,5 +31,5 @@ shutdown
 exit
 interface e0/1
 switchport mode access 
-switchport access vlan 3
+switchport access vlan 4
 exit
