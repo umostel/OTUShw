@@ -29,3 +29,8 @@ switchport mode access
 switchport access vlan 7
 shutdown
 exit
+interface e0/2
+switchport mode access
+switchport access vlan 3
+no shutdown
+exit
