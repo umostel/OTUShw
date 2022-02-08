@@ -12,3 +12,20 @@ login
 exit
 service password-encryption
 banner login Unathorization access deny
+vlan 3
+name Managment
+vlan 7
+name ParkingLot
+vlan 8
+name Native
+exit
+interface vlan 3
+ip address 192.168.3.11 255.255.255.0
+no shutdown
+exit
+ip default-gateway 192.168.3.1
+interface e0/3
+switchport mode access
+switchport access vlan 7
+shutdown
+exit
