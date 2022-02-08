@@ -32,11 +32,12 @@
 Конфиги оборудования
 
 ### R1
-interface Ethernet0/0
- no ip address
-!
-interface Ethernet0/0.3
- description interface for vlan3
+```
+interface Ethernet0/0  
+ no ip address  
+!  
+interface Ethernet0/0.3  
+ description interface for vlan3  
  encapsulation dot1Q 3
  ip address 192.168.3.1 255.255.255.0
 !
@@ -60,8 +61,10 @@ interface Ethernet0/2
 interface Ethernet0/3
  no ip address
  shutdown
+```
 
 ### SW1
+```
 interface Ethernet0/0
  switchport trunk allowed vlan 3,4,8
  switchport trunk encapsulation dot1q
@@ -86,9 +89,10 @@ interface Vlan3
  ip address 192.168.3.11 255.255.255.0
 !
 ip default-gateway 192.168.3.1
-
+```
 
 ### SW2
+```
 interface Ethernet0/0  
  switchport trunk allowed vlan 3,4,8  
  switchport trunk encapsulation dot1q  
@@ -114,4 +118,4 @@ interface Vlan3
  shutdown
 !
 ip default-gateway 192.168.3.1
-
+```
