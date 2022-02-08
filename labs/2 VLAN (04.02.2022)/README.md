@@ -92,6 +92,7 @@ ip default-gateway 192.168.3.1
 interface Ethernet0/0  
  switchport trunk allowed vlan 3,4,8  
  switchport trunk encapsulation dot1q  
+ switchport trunk native vlan 8
  switchport mode trunk  
 !
 interface Ethernet0/1  
