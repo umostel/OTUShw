@@ -1,0 +1,17 @@
+enable
+conf t
+hostname SW1
+no ip domain-lookup
+banner login c unauthorized access prohibited c
+line console 0
+logging synchronius
+password cisco
+login
+exit
+line vty 0 4
+logging synchronous 
+password cisco
+login
+exit
+enable password class
+service password-encryption 
