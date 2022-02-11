@@ -2,7 +2,6 @@ enable
 conf t
 hostname SW2
 no ip domain-lookup
-banner login c unauthorized access prohibited c
 banner login %
 Warning!
 Authorized person only.
