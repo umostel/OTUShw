@@ -1,0 +1,25 @@
+enable
+conf t
+hostname SW2
+no ip domain-lookup
+banner login c unauthorized access prohibited c
+banner login %
+Warning!
+Authorized person only.
+%
+line console 0
+logging synchronius
+password cisco
+login
+exit
+line vty 0 4
+logging synchronous 
+password cisco
+login
+exit
+enable password class
+service password-encryption 
+interface vlan1
+ip address 192.168.1.2 255.255.255.0
+no shudown
+exit
