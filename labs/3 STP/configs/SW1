@@ -19,3 +19,11 @@ interface vlan1
 ip address 192.168.1.1 255.255.255.0
 no shudown
 exit
+interface e0/0
+shutdown
+interface e0/1
+shutdown
+interface e0/2
+shutdown
+interface e0/3
+shutdown
