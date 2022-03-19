@@ -291,6 +291,45 @@ Part 5: Configure and verify
 ipv6 unicast-routing
 ```
 1.3. Настраиваем интерфейсы на роутерах R3 и R4, в соответствии со значениями в таблице:
+На R3 (на R4 аналогично):
+``
+R3(config)#int e0/1
+R3(config-if)#ipv6 address 2001:db8:acad:2::1/64
+R3(config-if)#ipv6 address fe80::1 link-local
+R3(config-if)#no shutdown
+R3(config)#int e0/0
+R3(config-if)#ipv6 address 2001:db8:acad:1::1/64
+R3(config-if)#ipv6 address fe80::1 link-local
+R3(config-if)#no shutdown
+```
+
+1.4. Прописываем "маршрут по умлочанию" на каждом роутере указывающий на IPv6 адрес интерфейса e0/1 противоположного роутера:
+На R3:
+```
+R3(config)#ipv6 route ::/0 2001:DB8:ACAD:2::2
+```
+На R4:
+```
+R4(config)#ipv6 route ::/0 2001:DB8:ACAD:2::1
+```
+Проверем работу роутинга пингуя с роутера ipv6 адрес интерфеса e0/0 противополного роутера
+```
+R3#ping ipv6 2001:db8:acad:3::1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:3::1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/4 ms
+
+R4#ping ipv6 2001:db8:acad:1::1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:1::1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/4 ms
+```
+
+1.5. 
+
+
 
 
 
