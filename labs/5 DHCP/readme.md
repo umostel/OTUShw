@@ -89,11 +89,103 @@ service password-encryption
 2. Производим настройку интерфейсов и VLAN устройств согласно схемы
 На R1
 ```
-int e0/1
-ip address 10.0.0.1 255.255.255.252
-no shutdown
-
+R1(config)# int e0/1
+R1(config-if)# ip address 10.0.0.1 255.255.255.252
+R1(config-if)# no shutdown
+R1(config-if)# exit
+R1(config)#int e0/0.100
+R1(config-subif)#ip address 192.168.1.1 255.255.255.192
+R1(config-subif)#no shut
+R1(config-subif)#exit
+R1(config)#int e0/0.200
+R1(config-subif)#ip address 192.168.1.65 255.255.255.224
+R1(config-subif)#no shut
+R1(config-subif)#exit
 ```
+
+На SW1
+```
+SW1(config)#vlan 100
+SW1(config-vlan)#name Clients
+SW1(config-vlan)#exit
+SW1(config)#vlan 200
+SW1(config-vlan)#name Managment
+SW1(config-vlan)#exit
+SW1(config)#Vlan 999
+SW1(config-vlan)#name Parking_lot
+SW1(config-vlan)#exit
+SW1(config)#
+SW1(config)#int vlan 200
+SW1(config-if)#ip address 192.168.1.66 255.255.255.224
+SW1(config-if)#no shut
+SW1(config-if)#exit
+SW1(config)#int e0/1
+SW1(config-if)#switchport mode access
+SW1(config-if)#switchport access vlan 100
+SW1(config-if)#exitint e0
+SW1(config)#int e0/0
+SW1(config-if)#switchport trunk encapsulation dot1q
+SW1(config-if)#switchport mode trunk
+SW1(config-if)#switchport trunk allowed vlan 100,200
+SW1(config-if)#switchport trunk native vlan 1000
+SW1(config-if)#exit
+SW1(config)#int range e0/2-3
+SW1(config-if-range)#switchport mode access
+SW1(config-if-range)#switchport access vlan 999
+SW1(config-if-range)#exit
+```
+
+На R2
+```
+R2(config)#int e0/1
+R2(config-if)#ip address 10.0.0.2 255.255.255.252
+R2(config-if)#no shut
+R2(config-if)#exit
+R2(config)#int e0/0
+R2(config-if)#ip add 192.168.1.97 255.255.255.240
+R2(config-if)#no shut
+R2(config-if)#exit
+```
+
+Прописываем маршруты по умолчанию на R1 и R2, указывающие на адрес ip интерфейса e0/1 R2 и R1 соответсвенно:
+На R1
+```
+R1(config)#ip route 0.0.0.0 0.0.0.0 10.0.0.2
+```
+На R2
+```
+#R2(config)#ip route 0.0.0.0 0.0.0.0 10.0.0.1
+```
+Проверяем сделанные настройки:  
+с R1 пингуем ip интерфейса R2:e0/0 R2 (192.168.1.97)
+```
+R1#ping 192.168.1.97
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.97, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```
+с R2 пингуем ip интерфейса R1:e0/0.100 (192.168.1.1) и ip интерфейса R2:e0/0.200 (192.168.1.65)
+```
+R2#ping 192.168.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+R2#ping 192.168.1.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+R2#ping 192.168.1.65
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.168.1.65, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+```
+
+
+
 
 
 4. Настройить и проверить работу двух DHCPv4 серверов на R1
