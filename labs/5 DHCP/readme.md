@@ -184,9 +184,74 @@ Sending 5, 100-byte ICMP Echos to 192.168.1.65, timeout is 2 seconds:
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```
 
-
-
-
+В случае проблем, для траблшутинга используем комманды:
+show ip interfaces brief
+show interfaces status
+show interfaces trunk
+show vlan 
+show vlan breif
+show ip route
 
 4. Настройить и проверить работу двух DHCPv4 серверов на R1
-5. Настроить и проверить DHCP Relay на R2
+Настраиваем DHCP сервер для двух подсетей (А и С). На R1 исключаем пять первых адресов из каждого пула и создаем два пула (SubA и SubC): указываем сети, которые используют эти пулы;  имя домена otus-lab.local; соответсвующие шлюзы по умолчанию; время аренды 2д12ч30м.
+
+```
+R1(config)#ip dhcp excluded-address 192.168.1.1 192.168.1.5
+R1(config)#ip dhcp pool SubA
+R1(dhcp-config)#network 192.168.1.0 255.255.255.192
+R1(dhcp-config)#domain-name otus-lab.local
+R1(dhcp-config)#default-router 192.168.1.1
+R1(dhcp-config)#lease 2 12 30
+R1(dhcp-config)#exit
+R1(config)#ip dhcp excluded-address 192.168.1.97 192.168.1.98
+R1(config)#ip dhcp pool SubB
+R1(dhcp-config)#network 192.168.1.96 255.255.255.240
+R1(dhcp-config)#domain-name otus-lab.local
+R1(dhcp-config)#default-router 192.168.1.97
+R1(dhcp-config)#lease 2 12 30
+R1(dhcp-config)#exit
+```
+Проверяем работсопособность DHCP, пытаясь получить адрес на VPC-A и проверка icmp доступность шлюза.
+```
+VPCS> ip dhcp
+DDORA IP 192.168.1.6/26 GW 192.168.1.1
+VPCS> ping 192.168.1.1
+84 bytes from 192.168.1.1 icmp_seq=1 ttl=255 time=0.269 ms
+84 bytes from 192.168.1.1 icmp_seq=2 ttl=255 time=0.477 ms
+84 bytes from 192.168.1.1 icmp_seq=3 ttl=255 time=0.551 ms
+84 bytes from 192.168.1.1 icmp_seq=4 ttl=255 time=0.443 ms
+84 bytes from 192.168.1.1 icmp_seq=5 ttl=255 time=0.469 ms
+```
+6. Настройка и проверка DHCP Relay на R2
+На R2:e0/0 указываем ip R1:e0/1 как адрес для пересылки запросов dhcp 
+```
+R2(config)#int e0/0
+R2(config-if)#ip helper-address 10.0.0.1
+R2(config-if)
+```
+Проверяем работсопособность пересылки, пытаясь получить адрес на VPC-B и проверка icmp доступность шлюза и VPC-A.
+``
+VPCS> ip dhcp
+DDORA IP 192.168.1.99/28 GW 192.168.1.97
+VPCS> ping 192.168.1.97
+84 bytes from 192.168.1.97 icmp_seq=1 ttl=255 time=0.247 ms
+84 bytes from 192.168.1.97 icmp_seq=2 ttl=255 time=0.443 ms
+^C
+VPCS> ping 192.168.1.6
+84 bytes from 192.168.1.6 icmp_seq=1 ttl=62 time=1.832 ms
+84 bytes from 192.168.1.6 icmp_seq=2 ttl=62 time=0.736 ms
+^C
+```
+Все работает.
+В случае проблем, проводим диагностику и траблшутинг коммандами:
+show ip dhcp pool 
+show ip dhcp binding 
+show ip dhcp server statistics 
+
+R2#sh ip int e0/0
+Ethernet0/0 is up, line protocol is up
+  Internet address is 192.168.1.97/28
+  Broadcast address is 255.255.255.255
+  Address determined by setup command
+  MTU is 1500 bytes
+  Helper address is 10.0.0.1
