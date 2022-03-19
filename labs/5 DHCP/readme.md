@@ -261,7 +261,7 @@ Ethernet0/0 is up, line protocol is up
 
 #### II. IPv6. SLAAC и DHCPv6
 ### Задание:
-Part 1: Build the Network and Configure Basic Device Settings
+1. В тестовой среде (EVE-NG) добавить объекты: два компьютера (VPC-C,VPC-D), два коммутатора L2 (SW3,SW4), два роутера (R3,R4). Объединить согласно схеме. Провести первоначальную базовую настройку.  
 Part 2: Verify SLAAC address assignment from R1
 Part 3: Configure and verify a Stateless DHCPv6 Server on R1
 Part 4: Configure and verify a Stateful DHCPv6 Server on R1
@@ -277,9 +277,23 @@ Part 5: Configure and verify
 |R3|e0/1|fe80::1|
 |R3|e0/0|2001:db8:acad:1::1/64|
 |R3|e0/0|fe80::1|
-|R3|e0/1|2001:db8:acad:2::2/64|
-|R3|e0/1|fe80::2|
-|R3|e0/0|2001:db8:acad:3::1/64|
-|R3|e0/0|fe80::1|
+|R4|e0/1|2001:db8:acad:2::2/64|
+|R4|e0/1|fe80::2|
+|R4|e0/0|2001:db8:acad:3::1/64|
+|R4|e0/0|fe80::1|
 |VPC-C|eth0|DHCP|
 |VPC-D|eth0|DHCP|
+
+1. Перовначальная настройка.
+1.1. Настраиваем R3,R4,SW3 и SW4 по аналагии с п.1 Раздела I (DHCPv4) данной лабораторной работы.
+1.2. Единственное отличие - на роутерах R3 и R4, в режиме глобальной конфигурации, включаем ipv6 роутинг командой:
+```
+ipv6 unicast-routing
+```
+1.3. Настраиваем интерфейсы на роутерах R3 и R4, в соответствии со значениями в таблице:
+
+
+
+
+
+
