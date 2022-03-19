@@ -1,5 +1,7 @@
 ## Домашняя работа к занятию 15.02.2022, DHCPv4/v6 и SLAAC 
+#### I. IPv4
 ### Задание:
+
 1. В тестовой среде (EVE-NG) добавить объекты: два компьютера (VPC-A,VPC-B), два коммутатора L2 (SW1,SW2), два роутера (R1,R2) и объединить согласно схеме
 2. Рассчитать схему адресов и внести данные в таблицу адресов оборудования
 3. Произвести настройку интерфейсов и VLAN устройств согласно таблиц
@@ -255,3 +257,29 @@ Ethernet0/0 is up, line protocol is up
   Address determined by setup command
   MTU is 1500 bytes
   Helper address is 10.0.0.1
+```
+
+#### II. IPv6. SLAAC и DHCPv6
+### Задание:
+Part 1: Build the Network and Configure Basic Device Settings
+Part 2: Verify SLAAC address assignment from R1
+Part 3: Configure and verify a Stateless DHCPv6 Server on R1
+Part 4: Configure and verify a Stateful DHCPv6 Server on R1
+Part 5: Configure and verify
+
+#### Графическая схема
+![alt-текст](https://github.com/umostel/OTUShw/blob/main/labs/5%20DHCP/labDHCPv6.jpg "графическая схема к лабараторной работе DHCPv6")
+
+#### Таблица адресов и оборудования
+| Устройстово | Интерфейс | IPv6 адрес | 
+|--- | --- | --- |
+|R3|e0/1|2001:db8:acad:2::1/64|
+|R3|e0/1|fe80::1|
+|R3|e0/0|2001:db8:acad:1::1/64|
+|R3|e0/0|fe80::1|
+|R3|e0/1|2001:db8:acad:2::2/64|
+|R3|e0/1|fe80::2|
+|R3|e0/0|2001:db8:acad:3::1/64|
+|R3|e0/0|fe80::1|
+|VPC-C|eth0|DHCP|
+|VPC-D|eth0|DHCP|
