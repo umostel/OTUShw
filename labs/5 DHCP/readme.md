@@ -327,12 +327,150 @@ Sending 5, 100-byte ICMP Echos to 2001:DB8:ACAD:1::1, timeout is 2 seconds:
 Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/4 ms
 ```
 
-1.5. 
+В случае проблем анализ и траблшутинг при помощи команд:
+show ipv6 interface breif
+show ipv6 route
+show ipv6 cef
 
 
+2. Проверяем работу SLAAC
+На VPC-С:
+```
+VPCS> ip auto
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6807/64
+ROUTER LINK-LAYER : aa:bb:cc:00:b0:00
+
+VPCS> show ipv6
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6807/64
+GLOBAL SCOPE      : 2001:db8:acad:1:2050:79ff:fe66:6807/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:b0:00
+MAC               : 00:50:79:66:68:07
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+````
+
+На VPC-D
+```
+VPCS> ip auto
+GLOBAL SCOPE      : 2001:db8:acad:3:2050:79ff:fe66:6808/64
+ROUTER LINK-LAYER : aa:bb:cc:00:c0:00
+
+VPCS> show ipv6
+
+NAME              : VPCS[1]
+LINK-LOCAL SCOPE  : fe80::250:79ff:fe66:6808/64
+GLOBAL SCOPE      : 2001:db8:acad:3:2050:79ff:fe66:6808/64
+DNS               : 
+ROUTER LINK-LAYER : aa:bb:cc:00:c0:00
+MAC               : 00:50:79:66:68:08
+LPORT             : 20000
+RHOST:PORT        : 127.0.0.1:30000
+MTU:              : 1500
+
+VPCS> 
+```
+SLAAC - работает, адреса получены.
+Проверяем доступность VPC-C c VPC-D
+```
+VPCS> ping 2001:db8:acad:1:2050:79ff:fe66:6807
+2001:db8:acad:1:2050:79ff:fe66:6807 icmp6_seq=1 ttl=60 time=18.148 ms
+2001:db8:acad:1:2050:79ff:fe66:6807 icmp6_seq=2 ttl=60 time=0.662 ms
+2001:db8:acad:1:2050:79ff:fe66:6807 icmp6_seq=3 ttl=60 time=0.714 ms
+2001:db8:acad:1:2050:79ff:fe66:6807 icmp6_seq=4 ttl=60 time=0.702 ms
+2001:db8:acad:1:2050:79ff:fe66:6807 icmp6_seq=5 ttl=60 time=0.643 ms
+```
+
+3. Настраиваем DHCPv6 сервер на R3
+3.1.  Настройка R3 для работы DHCPv6 в режиме stateless
+Создаем IPv6 пул (R3-Stateless) на R3. В качестве дополнительных передаваемых параметров указываем DNS - 2001:db8:acad::254 и имя домена otus-stateless.local
+```
+R3(config)#ipv6 dhcp pool R3-Stateless
+R3(config-dhcpv6)#dns-server 2001:db8:acad::254
+R3(config-dhcpv6)#domain-name otus-stateless.local
+```
+На интерефейсе R3:e0/0 включаем флаг O и указываем использовать пул R3-Stateless
+
+```
+R3(config)#int e0/0
+R3(config-if)#ipv6 nd other-config-flag 
+R3(config-if)#ipv6 dhcp server R3-Stateless
+```
+Поскольку у образа VPC, используемых в EVE-NG, есть сложность с работой DHCPv6, для проверки, пришлось добавить маршрутизатор R13 (как клиентское устройство) и подключить его портом e0/0 в SW3:e0/2. Далее включаем порт, включаем поддержку ipv6 и автоматическое получение адреса. Проверяем результат командами show ipv6 interface brief и show ipv6 dhcp interface e0/0 
+```
+Router(config)#int e0/0
+Router(config-if)#ipv6 enable 
+Router(config-if)#ipv6 address autoconfig 
+Router(config-if)#no shutdown
+Router(config-if)#do show ipv6 interface brief
+Ethernet0/0            [up/up]
+    FE80::A8BB:CCFF:FE00:D000
+    2001:DB8:ACAD:1:A8BB:CCFF:FE00:D000
+Ethernet0/1            [administratively down/down]
+    unassigned
+Ethernet0/2            [administratively down/down]
+    unassigned
+Ethernet0/3            [administratively down/down]
+    unassigned
+Router(config-if)#do show ipv6 dhcp interface e0/0 
+Ethernet0/0 is in client mode
+  Prefix State is IDLE (0)
+  Information refresh timer expires in 23:59:11
+  Address State is IDLE
+  List of known servers:
+    Reachable via address: FE80::1
+    DUID: 00030001AABBCC00B000
+    Preference: 0
+    Configuration parameters:
+      DNS server: 2001:DB8:ACAD::254
+      Domain name: otus-stateless.local
+      Information refresh time: 0
+  Prefix Rapid-Commit: disabled
+  Address Rapid-Commit: disabled
+```
+Видим, что адрес (2001:DB8:ACAD:1:A8BB:CCFF:FE00:D000) на интерфейсе получен, дополнитетельные параметры (DNS и имя домена) - также.
+
+3.2.  Настройка R3 для работы DHCPv6 в режиме stateful
+На R3 создаем пул R3-Stateful для сети 2001:db8:acad:3:aaaa::/80. Адреса из этого пула будут выдаваться рабочим станциям из сети, подключенной к интерфейсу R4:e0/0. Дополнительно, настроим передачу DNS (2001:db8:acad::254) и имя домена otus-stateful.local
+```
+R3(config)#ipv6 dhcp pool R3-Stateful
+R3(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
+R3(config-dhcpv6)#dns-server 2001:db8:acad::254
+R3(config-dhcpv6)#domain-name otus-stateful.local
+```
+На интерефейсе R3:e0/1 указываем использовать пул R3-Stateful
+```
+R3(config)#int e0/1
+R3(config-if)#ipv6 dhcp server R3-Stateful
+R3(config-if)#ipv6 nd managed-config-flag  
+R3(config-if)#exit
+```
+3.3. Включение пересылки DHCPv6 и проверка работы DHCPv6 Stateful
+Переподключаем порт e0/0 роутера R13 и SW3 в SW4  и наблюдаем текущий адрес полученный через SLAAC.
+```
+Router#show ipv6 interface brief 
+Ethernet0/0            [up/up]
+    FE80::A8BB:CCFF:FE00:D000
+Ethernet0/1            [administratively down/down]
+    unassigned
+Ethernet0/2            [administratively down/down]
+    unassigned
+Ethernet0/3            [administratively down/down]
+    unassigned
+```
+Включаем на интерфейсе R4:e0/0 пересылку dhcp на ip адрес интерфейса R3:e0/1. И переводим флаг M в 1.
+```
+R4(config)#int e0/0
+R4(config-if)#ipv6 dhcp relay destination 2001:db8:acad:2::1 e0/1
+R4(config-if)# ipv6 nd managed-config-flag 
+R4(config-if)#exit
+```
 
 
-
+Проверяем результат командами show ipv6 interface brief и show ipv6 dhcp interface e0/0 
 
 
 
