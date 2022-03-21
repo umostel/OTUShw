@@ -403,7 +403,7 @@ R3(config-if)#ipv6 dhcp server R3-Stateless
 ```
 Router(config)#int e0/0
 Router(config-if)#ipv6 enable 
-Router(config-if)#ipv6 address autoconfig 
+Router(config-if)#ipv6 address dhcp 
 Router(config-if)#no shutdown
 Router(config-if)#do show ipv6 interface brief
 Ethernet0/0            [up/up]
@@ -441,7 +441,7 @@ R3(config-dhcpv6)#address prefix 2001:db8:acad:3:aaa::/80
 R3(config-dhcpv6)#dns-server 2001:db8:acad::254
 R3(config-dhcpv6)#domain-name otus-stateful.local
 ```
-На интерефейсе R3:e0/1 указываем использовать пул R3-Stateful
+На интерефейсе R3:e0/1 указываем использовать пул R3-Stateful, и переводим флаг M=0->M=1
 ```
 R3(config)#int e0/1
 R3(config-if)#ipv6 dhcp server R3-Stateful
@@ -461,7 +461,7 @@ Ethernet0/2            [administratively down/down]
 Ethernet0/3            [administratively down/down]
     unassigned
 ```
-Включаем на интерфейсе R4:e0/0 пересылку dhcp на ip адрес интерфейса R3:e0/1. И переводим флаг M в 1.
+Включаем на интерфейсе R4:e0/0 пересылку dhcp на ip адрес интерфейса R3:e0/1. 
 ```
 R4(config)#int e0/0
 R4(config-if)#ipv6 dhcp relay destination 2001:db8:acad:2::1 e0/1
@@ -470,7 +470,36 @@ R4(config-if)#exit
 ```
 
 
-Проверяем результат командами show ipv6 interface brief и show ipv6 dhcp interface e0/0 
+Проверяем на R13 результат командами show ipv6 interface brief и show ipv6 dhcp interface e0/0
 
-
+R13#show ipv6 int br
+Ethernet0/0            [up/up]
+   FE80::A8BB:CCFF:FE00:D020
+    2001:DB8:ACAD:3:AAA:68B6:5A53:62DC
+Ethernet0/1            [administratively down/down]
+    unassigned
+Ethernet0/2            [administratively down/down]
+    unassigned
+Ethernet0/3            [administratively down/down]
+    unassigned
+R13#show ipv6 dhcp interface e0/0
+Ethernet0/0 is in client mode
+  Prefix State is IDLE
+  Address State is OPEN
+  Renew for address will be sent in 11:59:16
+  List of known servers:
+    Reachable via address: FE80::1
+    DUID: 00030001AABBCC00B000
+    Preference: 0
+    Configuration parameters:
+      IA NA: IA ID 0x00050001, T1 43200, T2 69120
+        Address: 2001:DB8:ACAD:3:AAA:68B6:5A53:62DC/128
+                preferred lifetime 86400, valid lifetime 172800
+                expires at Mar 23 2022 10:27 PM (172757 seconds)
+      DNS server: 2001:DB8:ACAD::254
+      Domain name: otus-stateful.local
+      Information refresh time: 0
+  Prefix Rapid-Commit: disabled
+  Address Rapid-Commit: disabled
+```
 
